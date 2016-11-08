@@ -41,12 +41,20 @@
     (> new-col old-col)
     (assoc-in rooms [old-row old-col :right?] false)))
 
+(declare create-maze)
+
+(defn create-maze-loop [rooms old-row old-col new-row new-col]
+  (let [new-rooms (tear-down-wall rooms old-row old-col new-row new-col)
+        new-rooms (create-maze new-rooms new-row new-col)]
+    (if (= rooms new-rooms)
+      rooms
+      (create-maze-loop new-rooms old-row old-col new-row new-col))))
+
 (defn create-maze [rooms row col]
   (let [rooms (assoc-in rooms [row col :visited?] true)
         next-room (random-neighbor rooms row col)]
     (if next-room
-      (let [rooms (tear-down-wall rooms row col (:row next-room) (:col next-room))]
-        (create-maze rooms (:row next-room) (:col next-room)))
+      (create-maze-loop rooms row col (:row next-room) (:col next-room))
       rooms)))
 
 (defn -main [& args]
